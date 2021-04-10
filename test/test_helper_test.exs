@@ -35,6 +35,17 @@ defmodule AbsintheErrorPayload.TestHelperTest do
     }
   end
 
+  def list_of_nested_fields do
+    %{
+      root: :string,
+      single: [%{
+        string: :string,
+        integer: :integer,
+        nillable: :nillable
+      }]
+    }
+  end
+
   def input do
     %{
       date: @time,
@@ -70,6 +81,24 @@ defmodule AbsintheErrorPayload.TestHelperTest do
         integer: 1,
         nillable: nil
       }
+    }
+  end
+
+  def list_of_nested_input do
+    %{
+      root: "root string",
+      single: [
+        %{
+          string: "1st nested string",
+          integer: 1,
+          nillable: nil
+        },
+        %{
+          string: "2nd nested string",
+          integer: 2,
+          nillable: "nillable but not nil"
+        }
+      ]
     }
   end
 
@@ -111,6 +140,24 @@ defmodule AbsintheErrorPayload.TestHelperTest do
     }
   end
 
+  def list_of_nested_graphql do
+    %{
+      "root" => "root string",
+      "single" => [
+        %{
+          "string" => "1st nested string",
+          "integer" => 1,
+          "nillable" => nil
+        },
+        %{
+          "string" => "2nd nested string",
+          "integer" => 2,
+          "nillable" => "nillable but not nil"
+        }
+      ]
+    }
+  end
+
   describe "assert_equivalent_graphql/3" do
     test "all types compare" do
       assert_equivalent_graphql(input(), graphql(), fields())
@@ -130,6 +177,10 @@ defmodule AbsintheErrorPayload.TestHelperTest do
 
     test "nested fields compare" do
       assert_equivalent_graphql(nested_input(), nested_graphql(), nested_fields())
+    end
+
+    test "list of nested fields compare" do
+      assert_equivalent_graphql(list_of_nested_input(), list_of_nested_graphql(), list_of_nested_fields())
     end
   end
 
@@ -152,6 +203,16 @@ defmodule AbsintheErrorPayload.TestHelperTest do
       }
 
       assert_mutation_success(nested_input(), mutation_response, nested_fields())
+    end
+
+    test "matches result with list of nested fields" do
+      mutation_response = %{
+        "successful" => true,
+        "messages" => [],
+        "result" => list_of_nested_graphql()
+      }
+
+      assert_mutation_success(list_of_nested_input(), mutation_response, list_of_nested_fields())
     end
   end
 

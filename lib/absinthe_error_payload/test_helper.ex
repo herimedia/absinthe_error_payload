@@ -134,6 +134,18 @@ defmodule AbsintheErrorPayload.TestHelper do
     |> Enum.each(&assert_values_match/1)
   end
 
+  defp assert_values_match({field, [%{} = sub_fields], expected, response}) do
+    assert is_list(expected), "expected a list expectation, was #{inspect(expected)}"
+    assert is_list(response), "expected a list response, was #{inspect(response)}"
+
+    assert Enum.count(expected) == Enum.count(response),
+           "Expected #{Enum.count(expected)} items, recieved #{inspect(response)}"
+
+    for {e, m} <- Enum.zip(expected, response) do
+      assert_values_match({field, sub_fields, e, m})
+    end
+  end
+
   defp assert_values_match({field, _type, expected, response}) do
     assert {field, expected} == {field, response}
   end
